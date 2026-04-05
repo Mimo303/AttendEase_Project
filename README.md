@@ -37,7 +37,6 @@ attend-ease/
 |-- README.md
 ```
 
-## 📸 Screenshots
 
 ## 🤝 Contributing
 Contributions are welcome! To contribute to AttendEase, please fork the repository and submit a pull request with your changes.
@@ -46,7 +45,7 @@ Contributions are welcome! To contribute to AttendEase, please fork the reposito
 AttendEase is licensed under the MIT License.
 
 ## 📬 Contact
-For questions or feedback, please contact us at [support@attend-ease.com](mailto:support@attend-ease.com).
+For questions or feedback, please contact us at mimokpss8@gmail.com.
 
 ## 💖 Thanks Message
-Thanks for considering AttendEase for your attendance tracking needs! This is written by [readme.ai](https://readme-generator-phi.vercel.app/).
+Thanks for considering AttendEase for your attendance tracking needs!
