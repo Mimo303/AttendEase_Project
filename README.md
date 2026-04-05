@@ -1,6 +1,6 @@
 # 🧠 AttendEase: A Web Application for Simplifying Attendance Tracking
 
-### A simple, offline attendance management system for BCA colleges — built with zero dependencies.
+### A simple, offline attendance management system for colleges — built with zero dependencies.
 
 No frameworks. No server. No database. Just open the file and use it.
 
@@ -151,7 +151,7 @@ No `node_modules`. No `package.json`. No build step.
 
 ## Project context
 
-Built as a BCA college minor project demonstrating practical use of core web technologies covered in a standard curriculum — DOM manipulation, event-driven programming, client-side storage, responsive layout, and file export — without any external dependencies.
+Built as a  college minor project demonstrating practical use of core web technologies covered in a standard curriculum — DOM manipulation, event-driven programming, client-side storage, responsive layout, and file export — without any external dependencies.
 
 ---
 
