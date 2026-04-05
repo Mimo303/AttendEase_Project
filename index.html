@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AttendEase – BCA Attendance Manager</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    /* ── Design Tokens ── */
+    :root {
+      --bg:          #f0f4f8;
+      --surface:     #ffffff;
+      --border:      #d9e2ec;
+      --primary:     #0b7285;
+      --primary-dk:  #085d6e;
+      --accent:      #e67700;
+      --accent-dk:   #c56200;
+      --success:     #2f9e44;
+      --success-dk:  #276537;
+      --danger:      #c92a2a;
+      --text:        #1a2535;
+      --text-muted:  #6b7c93;
+      --present-bg:  #d3f9d8;
+      --absent-bg:   #ffe3e3;
+      --radius:      10px;
+      --shadow:      0 2px 12px rgba(0,0,0,0.07);
+      --shadow-lg:   0 6px 24px rgba(0,0,0,0.11);
+      --font-d:      'Syne', sans-serif;
+      --font-b:      'DM Sans', sans-serif;
+      --tr:          0.18s ease;
+    }
+
+    /* ── Reset ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: var(--font-b); background: var(--bg); color: var(--text); min-height: 100vh; font-size: 15px; line-height: 1.6; }
+    ul { list-style: none; }
+
+    /* ── Header ── */
+    .site-header {
+      background: linear-gradient(135deg, #0b7285 0%, #1a2535 100%);
+      color: #fff; padding: 18px 32px;
+      box-shadow: var(--shadow-lg);
+      position: sticky; top: 0; z-index: 100;
+    }
+    .header-inner { max-width: 1280px; margin: 0 auto; display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
+    .logo { display: flex; align-items: center; gap: 10px; font-family: var(--font-d); font-size: 1.55rem; font-weight: 800; letter-spacing: -0.5px; }
+    .logo-icon { font-size: 1.7rem; }
+    .tagline { font-size: 0.83rem; opacity: 0.72; border-left: 1px solid rgba(255,255,255,0.3); padding-left: 16px; margin-left: 4px; }
+
+    /* ── Layout ── */
+    .main-layout { max-width: 1280px; margin: 28px auto; padding: 0 20px; display: grid; grid-template-columns: 310px 1fr; gap: 22px; align-items: start; }
+
+    /* ── Card ── */
+    .card { background: var(--surface); border-radius: var(--radius); border: 1px solid var(--border); box-shadow: var(--shadow); padding: 22px; margin-bottom: 20px; }
+    .card-title { font-family: var(--font-d); font-size: 1rem; font-weight: 700; color: var(--primary); margin-bottom: 16px; padding-bottom: 10px; border-bottom: 2px solid var(--border); }
+
+    /* ── Inputs ── */
+    .input-row { display: flex; gap: 8px; margin-bottom: 10px; }
+    .input-col { display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px; }
+    input[type="text"], input[type="date"], select {
+      width: 100%; padding: 9px 12px; border: 1px solid var(--border); border-radius: 7px;
+      font-family: var(--font-b); font-size: 0.91rem; color: var(--text); background: #f8fafc;
+      transition: border-color var(--tr), box-shadow var(--tr); outline: none; appearance: auto;
+    }
+    input[type="text"]:focus, input[type="date"]:focus, select:focus {
+      border-color: var(--primary); box-shadow: 0 0 0 3px rgba(11,114,133,0.12); background: #fff;
+    }
+
+    /* ── Buttons ── */
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 9px 18px; border: none; border-radius: 7px; font-family: var(--font-b); font-size: 0.9rem; font-weight: 600; cursor: pointer; white-space: nowrap; transition: background var(--tr), transform var(--tr), box-shadow var(--tr); }
+    .btn:active { transform: scale(0.97); }
+    .btn-primary { background: var(--primary); color: #fff; }
+    .btn-primary:hover { background: var(--primary-dk); box-shadow: 0 2px 8px rgba(11,114,133,0.3); }
+    .btn-success { background: var(--success); color: #fff; }
+    .btn-success:hover { background: var(--success-dk); box-shadow: 0 2px 8px rgba(47,158,68,0.3); }
+    .btn-accent { background: var(--accent); color: #fff; }
+    .btn-accent:hover { background: var(--accent-dk); box-shadow: 0 2px 8px rgba(230,119,0,0.3); }
+    .btn-danger { background: transparent; color: var(--danger); border: 1px solid var(--danger); padding: 3px 9px; font-size: 0.78rem; }
+    .btn-danger:hover { background: var(--danger); color: #fff; }
+
+    /* ── List Items ── */
+    .list { display: flex; flex-direction: column; gap: 6px; margin-top: 6px; }
+    .list-item { display: flex; justify-content: space-between; align-items: center; background: #f0f4f8; border-radius: 6px; padding: 8px 12px; font-size: 0.88rem; border: 1px solid var(--border); animation: slideIn 0.2s ease; }
+    .list-item span { font-weight: 500; }
+    .subject-group { margin-bottom: 14px; }
+    .subject-group-title { font-size: 0.77rem; font-weight: 700; color: var(--primary); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 6px; }
+
+    /* ── Filter Bar ── */
+    .filter-bar { display: flex; flex-wrap: wrap; gap: 14px; margin-bottom: 18px; background: #f0f4f8; border-radius: 8px; padding: 14px; border: 1px solid var(--border); }
+    .filter-group { display: flex; flex-direction: column; gap: 5px; flex: 1; min-width: 150px; }
+    .filter-group label { font-size: 0.77rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.6px; }
+    .align-bottom { justify-content: flex-end; }
+
+    /* ── Attendance Table ── */
+    .att-table-wrap { overflow-x: auto; margin-top: 6px; }
+    .att-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+    .att-table th { background: var(--primary); color: #fff; padding: 10px 15px; text-align: left; font-weight: 600; font-size: 0.81rem; text-transform: uppercase; letter-spacing: 0.5px; }
+    .att-table th:first-child { border-radius: 8px 0 0 0; }
+    .att-table th:last-child  { border-radius: 0 8px 0 0; }
+    .att-table td { padding: 10px 15px; border-bottom: 1px solid var(--border); }
+    .att-table tr:last-child td { border-bottom: none; }
+    .att-table tr:hover td { background: #f8fafc; }
+    .att-table td:first-child { color: var(--text-muted); font-size: 0.84rem; }
+
+    /* ── Present / Absent Toggle ── */
+    .toggle-wrap { display: flex; gap: 6px; }
+    .btn-present, .btn-absent { padding: 5px 14px; border-radius: 20px; border: 2px solid transparent; font-size: 0.82rem; font-weight: 600; cursor: pointer; transition: all var(--tr); }
+    .btn-present { background: #f0fff4; color: #276537; border-color: #8ce99a; }
+    .btn-present.active, .btn-present:hover { background: var(--present-bg); border-color: #2f9e44; box-shadow: 0 0 0 2px rgba(47,158,68,0.2); }
+    .btn-absent { background: #fff5f5; color: var(--danger); border-color: #ffa8a8; }
+    .btn-absent.active, .btn-absent:hover { background: var(--absent-bg); border-color: var(--danger); box-shadow: 0 0 0 2px rgba(201,42,42,0.2); }
+
+    /* ── Badges ── */
+    .badge { display: inline-block; padding: 3px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 700; }
+    .badge-present { background: var(--present-bg); color: #276537; }
+    .badge-absent  { background: var(--absent-bg);  color: var(--danger); }
+
+    /* ── Misc ── */
+    .hint-text { color: var(--text-muted); font-size: 0.9rem; padding: 20px; text-align: center; border: 2px dashed var(--border); border-radius: 8px; margin: 6px 0; }
+    .action-bar { margin-top: 18px; display: flex; justify-content: flex-end; }
+    .toast { margin-top: 12px; padding: 11px 18px; background: #d3f9d8; color: #276537; border-radius: 8px; font-weight: 600; font-size: 0.9rem; border: 1px solid #8ce99a; text-align: center; animation: fadeIn 0.3s ease; }
+    .toast.hidden { display: none; }
+    .stats-bar { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
+    .stat-chip { border-radius: 20px; padding: 5px 15px; font-size: 0.82rem; font-weight: 600; color: #fff; background: var(--primary); }
+    .stat-chip.green { background: var(--success); }
+    .stat-chip.red   { background: var(--danger); }
+
+    /* ── Footer ── */
+    .site-footer { text-align: center; padding: 22px; color: var(--text-muted); font-size: 0.82rem; border-top: 1px solid var(--border); margin-top: 32px; }
+
+    /* ── Animations ── */
+    @keyframes slideIn { from { opacity:0; transform:translateY(-6px); } to { opacity:1; transform:translateY(0); } }
+    @keyframes fadeIn  { from { opacity:0; } to { opacity:1; } }
+
+    /* ── Tabs (mobile navigation between sidebar/main) ── */
+    .tab-bar { display: none; }
+
+    /* ── Responsive ── */
+    @media (max-width: 900px) {
+      .main-layout { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 600px) {
+      .site-header { padding: 14px 16px; }
+      .tagline { display: none; }
+      .main-layout { margin: 14px auto; padding: 0 10px; gap: 14px; }
+      .card { padding: 14px; margin-bottom: 14px; }
+      .filter-group { min-width: 100%; }
+      .input-row { flex-direction: column; }
+      .input-row .btn { width: 100%; }
+      .toggle-wrap { flex-direction: column; gap: 4px; }
+      .action-bar .btn { width: 100%; }
+
+      /* Mobile tab bar */
+      .tab-bar {
+        display: flex; position: sticky; top: 60px; z-index: 90;
+        background: var(--surface); border-bottom: 2px solid var(--border);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+      }
+      .tab-btn {
+        flex: 1; padding: 10px 4px; border: none; background: transparent;
+        font-family: var(--font-b); font-size: 0.78rem; font-weight: 600;
+        color: var(--text-muted); cursor: pointer; border-bottom: 3px solid transparent;
+        transition: all var(--tr);
+      }
+      .tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); }
+      .tab-panel { display: none; }
+      .tab-panel.active { display: block; }
+      /* On desktop, all panels visible */
+    }
+    @media (min-width: 601px) {
+      .tab-panel { display: block !important; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="site-header">
+  <div class="header-inner">
+    <div class="logo"><span class="logo-icon">📋</span><span>AttendEase</span></div>
+    <p class="tagline">BCA Attendance Management System</p>
+  </div>
+</header>
+
+<!-- MOBILE TAB BAR -->
+<div class="tab-bar">
+  <button class="tab-btn active" onclick="showTab('setup')">⚙️ Setup</button>
+  <button class="tab-btn" onclick="showTab('mark')">✅ Mark</button>
+  <button class="tab-btn" onclick="showTab('view')">📊 View</button>
+</div>
+
+<!-- MAIN -->
+<main class="main-layout">
+
+  <!-- SIDEBAR -->
+  <aside>
+
+    <!-- STUDENTS -->
+    <div class="tab-panel active" id="tab-setup">
+      <section class="card">
+        <h2 class="card-title">👤 Students</h2>
+        <div class="input-row">
+          <input type="text" id="student-name-input" placeholder="Enter student name" onkeydown="if(event.key==='Enter')addStudent()" />
+          <button class="btn btn-primary" onclick="addStudent()">Add</button>
+        </div>
+        <ul class="list" id="student-list"></ul>
+      </section>
+
+      <!-- SEMESTERS -->
+      <section class="card">
+        <h2 class="card-title">🎓 Semesters</h2>
+        <div class="input-row">
+          <select id="semester-select-add">
+            <option value="">Select Semester</option>
+            <option>Semester 1</option><option>Semester 2</option>
+            <option>Semester 3</option><option>Semester 4</option>
+            <option>Semester 5</option><option>Semester 6</option>
+          </select>
+          <button class="btn btn-primary" onclick="addSemester()">Add</button>
+        </div>
+        <ul class="list" id="semester-list"></ul>
+      </section>
+
+      <!-- SUBJECTS -->
+      <section class="card">
+        <h2 class="card-title">📚 Subjects</h2>
+        <div class="input-col">
+          <select id="subject-semester-select"><option value="">Select Semester</option></select>
+          <div class="input-row">
+            <input type="text" id="subject-name-input" placeholder="Enter subject name" onkeydown="if(event.key==='Enter')addSubject()" />
+            <button class="btn btn-primary" onclick="addSubject()">Add</button>
+          </div>
+        </div>
+        <div id="subject-list"></div>
+      </section>
+    </div><!-- end tab-setup -->
+
+  </aside>
+
+  <!-- CONTENT PANEL -->
+  <div>
+
+    <!-- MARK ATTENDANCE -->
+    <div class="tab-panel" id="tab-mark">
+      <section class="card">
+        <h2 class="card-title">✅ Mark Attendance</h2>
+        <div class="filter-bar">
+          <div class="filter-group">
+            <label>Semester</label>
+            <select id="attend-semester" onchange="loadSubjectsForAttendance()"><option value="">-- Select --</option></select>
+          </div>
+          <div class="filter-group">
+            <label>Subject</label>
+            <select id="attend-subject" onchange="renderAttendanceTable()"><option value="">-- Select --</option></select>
+          </div>
+          <div class="filter-group">
+            <label>Date</label>
+            <input type="date" id="attend-date" onchange="renderAttendanceTable()" />
+          </div>
+        </div>
+        <div id="attendance-table-wrapper">
+          <p class="hint-text">Select semester, subject and date to mark attendance.</p>
+        </div>
+        <div class="action-bar">
+          <button class="btn btn-success" onclick="saveAttendance()">💾 Save Attendance</button>
+        </div>
+        <div id="save-toast" class="toast hidden">✅ Attendance saved successfully!</div>
+      </section>
+    </div><!-- end tab-mark -->
+
+    <!-- VIEW ATTENDANCE -->
+    <div class="tab-panel" id="tab-view">
+      <section class="card">
+        <h2 class="card-title">📊 View Attendance</h2>
+        <div class="filter-bar">
+          <div class="filter-group">
+            <label>Semester</label>
+            <select id="view-semester" onchange="loadSubjectsForView()"><option value="">-- Select --</option></select>
+          </div>
+          <div class="filter-group">
+            <label>Subject</label>
+            <select id="view-subject"><option value="">-- Select --</option></select>
+          </div>
+          <div class="filter-group">
+            <label>Date (optional)</label>
+            <input type="date" id="view-date" />
+          </div>
+          <div class="filter-group align-bottom">
+            <button class="btn btn-primary" onclick="viewAttendance()">🔍 View</button>
+          </div>
+        </div>
+        <div id="view-result"></div>
+        <div class="action-bar" id="download-bar" style="display:none;">
+          <button class="btn btn-accent" onclick="downloadCSV()">⬇ Download CSV Report</button>
+        </div>
+      </section>
+    </div><!-- end tab-view -->
+
+  </div>
+</main>
+
+<footer class="site-footer">
+  AttendEase &copy; 2025 · BCA College Project · All data stored locally in your browser
+</footer>
+
+<script>
+/* ============================================================
+   AttendEase – script.js (embedded)
+   Data is stored in localStorage under 4 keys:
+     students   → string[]
+     semesters  → string[]
+     subjects   → { [sem]: string[] }
+     attendance → { [sem]: { [subject]: { [date]: { [student]: "Present"|"Absent" } } } }
+   ============================================================ */
+
+let students = [], semesters = [], subjects = {}, attendance = {};
+let lastViewData = null;
+
+/* ── Init ── */
+window.addEventListener("DOMContentLoaded", () => {
+  loadAll();
+  setTodayDate();
+  renderStudentList();
+  renderSemesterList();
+  renderSubjectList();
+  populateAllSemesterDropdowns();
+});
+
+/* ── Mobile Tabs ── */
+function showTab(name) {
+  // Tab panels
+  ["setup","mark","view"].forEach(t => {
+    document.getElementById("tab-"+t).classList.toggle("active", t === name);
+  });
+  // Tab buttons
+  document.querySelectorAll(".tab-btn").forEach((btn, i) => {
+    btn.classList.toggle("active", ["setup","mark","view"][i] === name);
+  });
+}
+
+/* ── Date ── */
+function setTodayDate() {
+  const today = new Date().toISOString().split("T")[0];
+  document.getElementById("attend-date").value = today;
+  document.getElementById("view-date").value   = today;
+}
+
+function formatDate(iso) {
+  if (!iso) return "";
+  const [y,m,d] = iso.split("-");
+  return `${d}/${m}/${y}`;
+}
+
+/* ── localStorage ── */
+function saveAll() {
+  localStorage.setItem("students",   JSON.stringify(students));
+  localStorage.setItem("semesters",  JSON.stringify(semesters));
+  localStorage.setItem("subjects",   JSON.stringify(subjects));
+  localStorage.setItem("attendance", JSON.stringify(attendance));
+}
+
+function loadAll() {
+  students   = JSON.parse(localStorage.getItem("students"))   || [];
+  semesters  = JSON.parse(localStorage.getItem("semesters"))  || [];
+  subjects   = JSON.parse(localStorage.getItem("subjects"))   || {};
+  attendance = JSON.parse(localStorage.getItem("attendance")) || {};
+}
+
+/* ─────────────────────────────────────────
+   STUDENTS
+───────────────────────────────────────── */
+function addStudent() {
+  const input = document.getElementById("student-name-input");
+  const name  = input.value.trim();
+  if (!name)                    return alert("Please enter a student name.");
+  if (students.includes(name))  return alert(`"${name}" is already added.`);
+  students.push(name);
+  saveAll();
+  renderStudentList();
+  input.value = "";
+}
+
+function renderStudentList() {
+  const list = document.getElementById("student-list");
+  if (students.length === 0) {
+    list.innerHTML = '<li style="color:var(--text-muted);font-size:0.85rem;padding:8px 0;">No students added yet.</li>';
+    return;
+  }
+  list.innerHTML = students.map((name, i) => `
+    <li class="list-item">
+      <span>👤 ${name}</span>
+      <button class="btn btn-danger" onclick="removeStudent(${i})">Remove</button>
+    </li>`).join("");
+}
+
+function removeStudent(i) {
+  if (!confirm(`Remove "${students[i]}"?`)) return;
+  students.splice(i, 1);
+  saveAll(); renderStudentList();
+}
+
+/* ─────────────────────────────────────────
+   SEMESTERS
+───────────────────────────────────────── */
+function addSemester() {
+  const sel = document.getElementById("semester-select-add");
+  const sem = sel.value;
+  if (!sem)                    return alert("Please select a semester.");
+  if (semesters.includes(sem)) return alert(`"${sem}" is already added.`);
+  semesters.push(sem);
+  if (!subjects[sem]) subjects[sem] = [];
+  saveAll();
+  renderSemesterList();
+  populateAllSemesterDropdowns();
+  sel.value = "";
+}
+
+function renderSemesterList() {
+  const list = document.getElementById("semester-list");
+  if (semesters.length === 0) {
+    list.innerHTML = '<li style="color:var(--text-muted);font-size:0.85rem;padding:8px 0;">No semesters added yet.</li>';
+    return;
+  }
+  list.innerHTML = semesters.map((sem, i) => {
+    const count = (subjects[sem] || []).length;
+    return `<li class="list-item">
+      <span>🎓 ${sem} <em style="color:var(--text-muted);font-size:0.8rem;">(${count} subject${count!==1?"s":""})</em></span>
+      <button class="btn btn-danger" onclick="removeSemester(${i})">Remove</button>
+    </li>`;
+  }).join("");
+}
+
+function removeSemester(i) {
+  const sem = semesters[i];
+  if (!confirm(`Remove "${sem}"? All its subjects and attendance will be deleted.`)) return;
+  semesters.splice(i, 1);
+  delete subjects[sem];
+  delete attendance[sem];
+  saveAll();
+  renderSemesterList(); renderSubjectList(); populateAllSemesterDropdowns();
+}
+
+function populateAllSemesterDropdowns() {
+  ["subject-semester-select","attend-semester","view-semester"].forEach(id => {
+    const sel = document.getElementById(id);
+    const cur = sel.value;
+    sel.innerHTML = '<option value="">-- Select --</option>';
+    semesters.forEach(sem => {
+      const o = document.createElement("option");
+      o.value = o.textContent = sem;
+      sel.appendChild(o);
+    });
+    if (semesters.includes(cur)) sel.value = cur;
+  });
+}
+
+/* ─────────────────────────────────────────
+   SUBJECTS
+───────────────────────────────────────── */
+function addSubject() {
+  const sem = document.getElementById("subject-semester-select").value;
+  const input = document.getElementById("subject-name-input");
+  const sub = input.value.trim();
+  if (!sem) return alert("Please select a semester first.");
+  if (!sub) return alert("Please enter a subject name.");
+  if (subjects[sem] && subjects[sem].includes(sub)) return alert(`"${sub}" already exists in ${sem}.`);
+  if (!subjects[sem]) subjects[sem] = [];
+  subjects[sem].push(sub);
+  saveAll();
+  renderSubjectList(); renderSemesterList();
+  input.value = "";
+}
+
+function renderSubjectList() {
+  const container = document.getElementById("subject-list");
+  if (semesters.length === 0) {
+    container.innerHTML = '<p class="hint-text" style="padding:10px;">Add semesters first.</p>';
+    return;
+  }
+  let html = "", hasAny = false;
+  semesters.forEach(sem => {
+    const subs = subjects[sem] || [];
+    if (!subs.length) return;
+    hasAny = true;
+    html += `<div class="subject-group"><p class="subject-group-title">${sem}</p><ul class="list">`;
+    subs.forEach((sub, i) => {
+      html += `<li class="list-item">
+        <span>📗 ${sub}</span>
+        <button class="btn btn-danger" onclick="removeSubject('${sem}',${i})">Remove</button>
+      </li>`;
+    });
+    html += `</ul></div>`;
+  });
+  container.innerHTML = hasAny ? html : '<p style="color:var(--text-muted);font-size:0.85rem;padding:8px 0;">No subjects added yet.</p>';
+}
+
+function removeSubject(sem, i) {
+  const sub = subjects[sem][i];
+  if (!confirm(`Remove "${sub}" from ${sem}?`)) return;
+  subjects[sem].splice(i, 1);
+  if (attendance[sem] && attendance[sem][sub]) delete attendance[sem][sub];
+  saveAll(); renderSubjectList(); renderSemesterList();
+}
+
+/* ─────────────────────────────────────────
+   MARK ATTENDANCE
+───────────────────────────────────────── */
+function loadSubjectsForAttendance() {
+  const sem = document.getElementById("attend-semester").value;
+  const subSel = document.getElementById("attend-subject");
+  subSel.innerHTML = '<option value="">-- Select --</option>';
+  (subjects[sem] || []).forEach(sub => {
+    const o = document.createElement("option");
+    o.value = o.textContent = sub;
+    subSel.appendChild(o);
+  });
+  document.getElementById("attendance-table-wrapper").innerHTML =
+    '<p class="hint-text">Select semester, subject and date to mark attendance.</p>';
+}
+
+function loadSubjectsForView() {
+  const sem = document.getElementById("view-semester").value;
+  const subSel = document.getElementById("view-subject");
+  subSel.innerHTML = '<option value="">-- Select --</option>';
+  (subjects[sem] || []).forEach(sub => {
+    const o = document.createElement("option");
+    o.value = o.textContent = sub;
+    subSel.appendChild(o);
+  });
+}
+
+function renderAttendanceTable() {
+  const sem     = document.getElementById("attend-semester").value;
+  const subject = document.getElementById("attend-subject").value;
+  const date    = document.getElementById("attend-date").value;
+  const wrapper = document.getElementById("attendance-table-wrapper");
+
+  if (!sem || !subject || !date) {
+    wrapper.innerHTML = '<p class="hint-text">Select semester, subject and date to mark attendance.</p>';
+    return;
+  }
+  if (students.length === 0) {
+    wrapper.innerHTML = '<p class="hint-text">No students found. Please add students first.</p>';
+    return;
+  }
+
+  const saved = attendance[sem]?.[subject]?.[date] || {};
+
+  let html = `<div class="att-table-wrap"><table class="att-table">
+    <thead><tr><th>#</th><th>Student Name</th><th>Status</th></tr></thead><tbody>`;
+
+  students.forEach((name, i) => {
+    const status = saved[name] || "Present";
+    html += `<tr>
+      <td>${i+1}</td>
+      <td><strong>${name}</strong></td>
+      <td><div class="toggle-wrap">
+        <button class="btn-present ${status==="Present"?"active":""}" id="btn-P-${i}" onclick="setStatus(${i},'Present')">✅ Present</button>
+        <button class="btn-absent  ${status==="Absent" ?"active":""}" id="btn-A-${i}" onclick="setStatus(${i},'Absent')">❌ Absent</button>
+      </div></td>
+    </tr>`;
+  });
+
+  html += `</tbody></table></div>`;
+  wrapper.innerHTML = html;
+}
+
+function setStatus(i, status) {
+  document.getElementById(`btn-P-${i}`).classList.toggle("active", status === "Present");
+  document.getElementById(`btn-A-${i}`).classList.toggle("active", status === "Absent");
+}
+
+function saveAttendance() {
+  const sem     = document.getElementById("attend-semester").value;
+  const subject = document.getElementById("attend-subject").value;
+  const date    = document.getElementById("attend-date").value;
+
+  if (!sem || !subject || !date) return alert("Please select Semester, Subject and Date.");
+  if (students.length === 0)     return alert("No students found. Please add students first.");
+
+  const record = {};
+  students.forEach((name, i) => {
+    const btnA = document.getElementById(`btn-A-${i}`);
+    record[name] = (btnA && btnA.classList.contains("active")) ? "Absent" : "Present";
+  });
+
+  if (!attendance[sem])          attendance[sem] = {};
+  if (!attendance[sem][subject]) attendance[sem][subject] = {};
+  attendance[sem][subject][date] = record;
+
+  saveAll();
+
+  const toast = document.getElementById("save-toast");
+  toast.classList.remove("hidden");
+  setTimeout(() => toast.classList.add("hidden"), 2500);
+}
+
+/* ─────────────────────────────────────────
+   VIEW ATTENDANCE
+───────────────────────────────────────── */
+function viewAttendance() {
+  const sem        = document.getElementById("view-semester").value;
+  const subject    = document.getElementById("view-subject").value;
+  const dateFilter = document.getElementById("view-date").value;
+  const result     = document.getElementById("view-result");
+  const dlBar      = document.getElementById("download-bar");
+
+  lastViewData = null;
+  dlBar.style.display = "none";
+  result.innerHTML = "";
+
+  if (!sem || !subject) {
+    result.innerHTML = '<p class="hint-text">Please select Semester and Subject.</p>';
+    return;
+  }
+
+  const subData = attendance[sem]?.[subject];
+  if (!subData || !Object.keys(subData).length) {
+    result.innerHTML = '<p class="hint-text">No attendance data found for this selection.</p>';
+    return;
+  }
+
+  let dates = Object.keys(subData).sort();
+  if (dateFilter) {
+    dates = dates.filter(d => d === dateFilter);
+    if (!dates.length) {
+      result.innerHTML = `<p class="hint-text">No attendance recorded for ${formatDate(dateFilter)}.</p>`;
+      return;
+    }
+  }
+
+  // Collect all students (current list + historical)
+  const studentSet = new Set(students);
+  dates.forEach(d => Object.keys(subData[d]).forEach(s => studentSet.add(s)));
+  const allStudents = [...studentSet];
+
+  // Per-student stats
+  const stats = {};
+  allStudents.forEach(s => { stats[s] = { present: 0, total: 0 }; });
+  dates.forEach(d => {
+    allStudents.forEach(s => {
+      const st = subData[d]?.[s];
+      if (st) { stats[s].total++; if (st==="Present") stats[s].present++; }
+    });
+  });
+
+  let totalP = 0, totalA = 0;
+  allStudents.forEach(s => { totalP += stats[s].present; totalA += stats[s].total - stats[s].present; });
+
+  let html = `<div class="stats-bar">
+    <span class="stat-chip">📅 ${dates.length} Date${dates.length!==1?"s":""}</span>
+    <span class="stat-chip">👤 ${allStudents.length} Student${allStudents.length!==1?"s":""}</span>
+    <span class="stat-chip green">✅ ${totalP} Present</span>
+    <span class="stat-chip red">❌ ${totalA} Absent</span>
+  </div>
+  <div class="att-table-wrap"><table class="att-table"><thead><tr>
+    <th>#</th><th>Student</th>
+    ${dates.map(d=>`<th>${formatDate(d)}</th>`).join("")}
+    <th>✅</th><th>❌</th><th>%</th>
+  </tr></thead><tbody>`;
+
+  allStudents.forEach((name, i) => {
+    const pct   = stats[name].total > 0 ? Math.round((stats[name].present/stats[name].total)*100) : 0;
+    const color = pct >= 75 ? "var(--success)" : pct >= 50 ? "var(--accent)" : "var(--danger)";
+    html += `<tr><td>${i+1}</td><td><strong>${name}</strong></td>`;
+    dates.forEach(d => {
+      const st = subData[d]?.[name];
+      html += st === "Present"
+        ? `<td><span class="badge badge-present">Present</span></td>`
+        : st === "Absent"
+          ? `<td><span class="badge badge-absent">Absent</span></td>`
+          : `<td><span style="color:var(--text-muted)">—</span></td>`;
+    });
+    html += `<td><strong style="color:var(--success)">${stats[name].present}</strong></td>
+             <td><strong style="color:var(--danger)">${stats[name].total-stats[name].present}</strong></td>
+             <td><strong style="color:${color}">${pct}%</strong></td></tr>`;
+  });
+
+  html += `</tbody></table></div>`;
+  result.innerHTML = html;
+
+  lastViewData = { sem, subject, dates, allStudents, subData, stats };
+  dlBar.style.display = "flex";
+}
+
+/* ─────────────────────────────────────────
+   DOWNLOAD CSV
+───────────────────────────────────────── */
+function downloadCSV() {
+  if (!lastViewData) return alert("Please view attendance data first.");
+  const { sem, subject, dates, allStudents, subData, stats } = lastViewData;
+
+  const lines = [
+    `AttendEase Attendance Report`,
+    `Semester: ${sem}`,
+    `Subject: ${subject}`,
+    `Generated: ${new Date().toLocaleString()}`,
+    "",
+    ["#","Student Name",...dates.map(formatDate),"Total Present","Total Absent","Attendance %"].join(",")
+  ];
+
+  allStudents.forEach((name, i) => {
+    const pct = stats[name].total > 0 ? Math.round((stats[name].present/stats[name].total)*100)+"%" : "0%";
+    lines.push([
+      i+1,
+      `"${name}"`,
+      ...dates.map(d => subData[d]?.[name] || "—"),
+      stats[name].present,
+      stats[name].total - stats[name].present,
+      pct
+    ].join(","));
+  });
+
+  const blob = new Blob([lines.join("\n")], { type: "text/csv;charset=utf-8;" });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement("a");
+  a.href     = url;
+  a.download = `attendance_${sem.replace(/ /g,"_")}_${subject.replace(/ /g,"_")}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+</script>
+</body>
+</html>
